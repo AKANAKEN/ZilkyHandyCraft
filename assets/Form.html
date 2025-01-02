@@ -1,32 +1,131 @@
-<form id="contactForm" data-sheet-best="https://api.sheetbest.com/sheet/cf969697-682a-40e3-bad4-d54803eeeacf">
-    <div class="row align-items-stretch mb-5">
-        <div class="col-md-6">
-            <div class="form-group">
-                <!-- Name input-->
-                <input class="form-control" id="name" name="name" type="text" placeholder="Your Name *" required />
-                <div class="invalid-feedback">A name is required.</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Form with Timestamp</title>
+    <style>
+        /* Mencegah teks agar tidak dapat diblok */
+        .readonly_block, .readonly_block2 {
+            user-select: none; /* CSS3 property */
+            -webkit-user-select: none; /* Safari/Chrome */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+        }
+    </style>
+</head>
+<body>
+    <form id="contactForm" data-sheet-best="https://sheetdb.io/api/v1/ca9d38doa1197">
+        <div class="row align-items-stretch mb-5">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <!-- Name input -->
+                    <input class="form-control" id="name" name="name" type="text" placeholder="Your Name *" required />
+                    <div class="invalid-feedback">A name is required.</div>
+                </div>
+                <div class="form-group">
+                    <!-- Email input -->
+                    <input class="form-control" id="email" name="email" type="email" placeholder="Your Email *" required />
+                    <div class="invalid-feedback">A valid email is required.</div>
+                </div>
+                <div class="form-group">
+                    <!-- Phone input -->
+                    <input class="form-control" id="phone" name="phone" type="text" placeholder="Your Phone *" required />
+                    <div class="invalid-feedback">A phone number is required.</div>
+                </div>
+                <div class="form-group">
+                    <!-- Timestamp input -->
+                    <input class="form-control readonly_block2" id="timestamp" name="timestamp" type="text" readonly placeholder="Timestamp will appear here" />
+                </div>
             </div>
-            <div class="form-group">
-                <!-- Email address input-->
-                <input class="form-control" id="email" name="email" type="email" placeholder="Your Email *" required />
-                <div class="invalid-feedback">A valid email is required.</div>
+            <div class="col-md-6">
+                <div class="form-group form-group-textarea mb-5">
+                    <!-- Message input -->
+                    <textarea class="form-control" id="message" name="message" placeholder="Your Message *" required></textarea>
+                    <div class="invalid-feedback">A message is required.</div>
+                </div>
             </div>
-            <div class="form-group mb-md-0">
-                <!-- Phone number input-->
-                <input class="form-control" id="phone" name="phone" type="tel" placeholder="Your Phone *" required />
-                <div class="invalid-feedback">A phone number is required.</div>
+            <h1 class="readonly_block">=</h1>
+            <!-- Submit button -->
+            <div class="text-center">
+                <button class="btn btn-custom btn-primary btn-xl text-uppercase" id="submitButton" type="submit">Send Message</button>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="form-group form-group-textarea mb-md-0">
-                <!-- Message input-->
-                <textarea class="form-control" id="message" name="message" placeholder="Your Message *" required></textarea>
-                <div class="invalid-feedback">A message is required.</div>
-            </div>
-        </div>
-    </div>
-    <!-- Submit Button-->
-    <div class="text-center">
-        <button class="btn btn-custom btn-primary btn-xl text-uppercase" id="submitButton" type="submit">Send Message</button>
-    </div>
-</form>
+    </form>
+
+    <script>
+        // Function to generate the current timestamp
+        function generateTimestamp() {
+            const now = new Date();
+            const date = now.toISOString().split('T')[0]; // Format YYYY-MM-DD
+            const time = now.toTimeString().split(' ')[0]; // Format HH:mm:ss
+            return `${date} ${time}`;
+        }
+
+        // Update the timestamp input field every second
+        function startRealtimeTimestamp() {
+            const timestampInput = document.getElementById('timestamp');
+            if (timestampInput) {
+                setInterval(() => {
+                    timestampInput.value = generateTimestamp();
+                }, 1000); // Update every second
+            }
+        }
+
+        // Start updating timestamp on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            startRealtimeTimestamp();
+        });
+
+        // Handle form submission
+        document.getElementById('contactForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent form submission
+
+            const sheetBestUrl = this.getAttribute('data-sheet-best');
+            const apiToken = "6086lw19tdi79y0fw0sux0ph67hs01xxs3z2fgw1"; // Replace with your actual API token
+
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const message = document.getElementById('message').value;
+            const timestamp = document.getElementById('timestamp').value; // Get the readonly timestamp value
+
+            // Create data object
+            const data = {
+                Name: name,
+                Email: email,
+                Phone: phone,
+                Message: message,
+                Timestamp: timestamp,
+                "Submitted At": timestamp, // Include timestamp
+            };
+
+            console.log('Data before sending:', JSON.stringify(data, null, 2)); // Debug log
+
+            // Send data to SheetDB API
+            fetch(sheetBestUrl, {
+                method: "POST",
+                mode: "cors",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${apiToken}` // Include the API token in the header
+                },
+                body: JSON.stringify(data),
+            })
+                .then((response) => response.json())
+                .then((result) => {
+                    console.log('Server response:', result);
+                    alert('Your message has been sent successfully!');
+                    document.getElementById('contactForm').reset();
+
+                    // Reset timestamp after form reset
+                    document.getElementById('timestamp').value = generateTimestamp();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('There was an error submitting your message. Please try again.');
+                });
+        });
+    </script>
+</body>
+</html>
